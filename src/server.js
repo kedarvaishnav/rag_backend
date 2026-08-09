@@ -1,9 +1,9 @@
-import "dotenv/config";
 import app from "./app.js";
 import { env } from "./config/env.js";
+import { initializeCollection } from "./services/vectorService.js";
 
-const PORT = process.env.PORT||3000;
+await initializeCollection();
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(env.PORT, () => {
+    console.log(`Server is running on port ${env.PORT}`);
 });
