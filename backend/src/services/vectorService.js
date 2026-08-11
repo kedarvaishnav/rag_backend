@@ -2,26 +2,18 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import crypto from "crypto";
 
 const qdrant = new QdrantClient({
-    url:"http://localhost:6333",
+    url: "http://127.0.0.1:6333",
     checkCompatibility: false
 });
 
 const COLLECTION_NAME = "documents";
 
-const createCollection = async() => {
-    await qdrant.createCollection(COLLECTION_NAME,{
-        vectors:{
-            size:768,
-            distance:"Cosine"
-        }
-    });
-    console.log("Collection created");
-};
-
 const initializeCollection = async () => {
     const exists = await qdrant.collectionExists(COLLECTION_NAME);
 
-    if (!exists) {
+    console.log("Collection exists:", exists);
+
+    if (!exists.exists) {
         await qdrant.createCollection(COLLECTION_NAME, {
             vectors: {
                 size: 768,
@@ -35,24 +27,29 @@ const initializeCollection = async () => {
     }
 };
 
-const storeChunks = async (embeddedChunks , documentId)=>{
+const storeChunks = async (embeddedChunks, documentId) => {
 
-    const points = embeddedChunks.map((chunk , index)=>({
+    const points = embeddedChunks.map((chunk, index) => ({
         id: crypto.randomUUID(),
 
         vector: chunk.vector,
 
-        payload:{
+        payload: {
             text: chunk.text,
             documentId: documentId,
             chunkIndex: index
         }
     }));
 
-    await qdrant.upsert(COLLECTION_NAME,{
-        wait:true,
-        points:points
+    await qdrant.upsert(COLLECTION_NAME, {
+        wait: true,
+        points: points
     });
+
+    console.log(`${points.length} points stored in Qdrant`);
 };
 
-export {initializeCollection , storeChunks};
+export {
+    initializeCollection,
+    storeChunks
+};

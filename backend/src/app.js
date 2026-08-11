@@ -7,6 +7,7 @@ import logger from "./middleware/logger.js";
 import errorHandler from "./middleware/errorHandler.js";
 import auth from "./middleware/auth.js";
 import documentrouter from "./routes/document.js";
+import queryrouter from "./routes/query.js";
 
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(logger);
 // app.use(auth);  globally only if it used every where
+app.use("/api/v1" , queryrouter);
 app.use("/api/v1", healthrouter);
 app.use("/api/v1" ,documentrouter);
 
