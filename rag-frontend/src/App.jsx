@@ -1,195 +1,94 @@
 import { useState } from "react";
 
+import DocumentUpload from "./components/DocumentUpload";
+import QuestionInput from "./components/QuestionInput";
+import Answer from "./components/Answer";
+import Sources from "./components/Sources";
+import "./App.css";
+
 function App() {
     const [file, setFile] = useState(null);
-    const [uploading, setUploading] = useState(false);
     const [result, setResult] = useState(null);
     const [uploadError, setUploadError] = useState("");
+    const [uploaded, setUploaded] = useState(false);
 
     const [question, setQuestion] = useState("");
     const [asking, setAsking] = useState(false);
     const [answer, setAnswer] = useState("");
     const [queryError, setQueryError] = useState("");
+    const [sources, setSources] = useState([]);
 
-    const uploadDocument = async () => {
-        if (!file) {
-            setUploadError("Please select a PDF first");
-            return;
-        }
-
-        setUploadError("");
+    const handleNewDocument = () => {
+        setAnswer("");
+        setSources([]);
+        setQueryError("");
+        setQuestion("");
         setResult(null);
-
-        const formData = new FormData();
-
-        formData.append("file", file);
-
-        setUploading(true);
-
-        try {
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/v1/documents`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: import.meta.env.VITE_AUTH_TOKEN
-                    },
-                    body: formData
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Upload failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            setResult(data);
-
-            console.log(data);
-
-        } catch (error) {
-            setUploadError(error.message);
-            console.log("Upload failed:", error);
-
-        } finally {
-            setUploading(false);
-        }
+        setUploaded(false);
     };
 
-    const askQuestion = async () => {
-        if (question.trim() === "") {
-            setQueryError("Please ask a question");
-            return;
-        }
+    const handleUploadResult = (data) => {
+        setResult(data);
+        setUploaded(true);
+        setFile(null);
+    };
 
-        setQueryError("");
-        setAnswer("");
-        setAsking(true);
-
-        try {
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/v1/query`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: import.meta.env.VITE_AUTH_TOKEN
-                    },
-                    body: JSON.stringify({
-                        question: question
-                    })
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Query failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            setAnswer(data.answer);
-
-            console.log(data);
-
-        } catch (error) {
-            setQueryError(error.message);
-            console.log("Query failed:", error);
-
-        } finally {
-            setAsking(false);
-        }
+    const handleQueryResult = (data) => {
+        setAnswer(data.answer);
+        setSources(data.sources ?? []);
     };
 
     return (
-        <div>
-            <h1>RAG DOCUMENT Q&A</h1>
+        <div className="app">
 
-            {/* PDF Upload */}
+            <header className="header">
+                <h1>RAG DOCUMENT Q&A</h1>
+                <p>Upload a document and ask questions about it.</p>
+            </header>
 
-            <input
-                type="file"
-                accept=".pdf"
-                onChange={(event) => {
-                    setFile(event.target.files[0]);
-                }}
-            />
+            <main className="container">
 
-            {file && (
-                <p>
-                    Selected file: {file.name}
-                </p>
-            )}
+                <section className="card">
+                    <DocumentUpload
+                        file={file}
+                        setFile={setFile}
+                        uploaded={uploaded}
+                        uploadError={uploadError}
+                        setUploadError={setUploadError}
+                        result={result}
+                        handleNewDocument={handleNewDocument}
+                        handleUploadResult={handleUploadResult}
+                    />
+                </section>
 
-            <button
-                onClick={uploadDocument}
-                disabled={uploading}
-            >
-                {uploading ? "Uploading..." : "Upload Document"}
-            </button>
+                <section className="card">
+                    <QuestionInput
+                        uploaded={uploaded}
+                        question={question}
+                        setQuestion={setQuestion}
+                        asking={asking}
+                        setAsking={setAsking}
+                        queryError={queryError}
+                        setQueryError={setQueryError}
+                        handleQueryResult={handleQueryResult}
+                    />
+                </section>
 
-            {/* Upload Result */}
+                <section className="card">
+                    <Answer
+                        answer={answer}
+                    />
+                </section>
 
-            {result && (
-                <div>
-                    <h3>Upload Successful</h3>
+                <section className="card">
+                    <Sources
+                        answer={answer}
+                        sources={sources}
+                    />
+                </section>
 
-                    <p>
-                        Message: {result.message}
-                    </p>
+            </main>
 
-                    <p>
-                        File: {result.filename}
-                    </p>
-
-                    <p>
-                        Chunks: {result.chunkCount}
-                    </p>
-                </div>
-            )}
-
-            {uploadError && (
-                <p>
-                    Error: {uploadError}
-                </p>
-            )}
-
-            {/* Question */}
-
-            <h2>Ask a Question</h2>
-
-            <input
-                type="text"
-                value={question}
-                onChange={(event) => {
-                    setQuestion(event.target.value);
-                }}
-                placeholder="Ask something about the document..."
-            />
-
-            <button
-                onClick={askQuestion}
-                disabled={asking}
-            >
-                {asking ? "Asking..." : "Ask Question"}
-            </button>
-
-            {/* Query Error */}
-
-            {queryError && (
-                <p>
-                    Error: {queryError}
-                </p>
-            )}
-
-            {/* Answer */}
-
-            {answer && (
-                <div>
-                    <h3>Answer</h3>
-                    <p>{answer}</p>
-                </div>
-            )}
         </div>
     );
 }
