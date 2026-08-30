@@ -1,8 +1,9 @@
 import retrieveChunks from "./services/retrievalService.js";
 
 const question = "What did John Doe study?";
+const documentId = "test-doc-id";
 
-const results = await retrieveChunks(question);
+const results = await retrieveChunks(question, documentId);
 
 console.log("Number of results:", results.length);
 

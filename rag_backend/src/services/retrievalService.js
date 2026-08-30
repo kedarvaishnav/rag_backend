@@ -8,7 +8,7 @@ const qdrant = new QdrantClient({
 
 const COLLECTION_NAME = "documents";
 
-const retrieveChunks = async (query) => {
+const retrieveChunks = async (query, documentId) => {
 
     const queryVectors = await generateEmbeddings([query]);
 
@@ -21,6 +21,16 @@ const retrieveChunks = async (query) => {
     const results = await qdrant.query(COLLECTION_NAME, {
         query: queryVector,
         limit: 5,
+        filter: {
+            must: [
+                {
+                    key: "documentId",
+                    match: {
+                        value: documentId
+                    }
+                }
+            ]
+        },
         with_payload: true
     });
 

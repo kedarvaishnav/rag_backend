@@ -24,7 +24,7 @@ const uploadDocument = async (file) => {
 };
 
 
-const askQuestion = async (question) => {
+const askQuestion = async (question, documentId) => {
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/query`,
         {
@@ -34,7 +34,8 @@ const askQuestion = async (question) => {
                 Authorization: import.meta.env.VITE_AUTH_TOKEN
             },
             body: JSON.stringify({
-                question: question
+                question: question,
+                documentId: documentId
             })
         }
     );
@@ -48,8 +49,31 @@ const askQuestion = async (question) => {
     return data;
 };
 
+const getDocument = async (documentId) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/documents/${encodeURIComponent(documentId)}`,
+        {
+            method: "GET",
+            headers: {
+                Authorization: import.meta.env.VITE_AUTH_TOKEN
+            }
+        }
+    );
+
+    if (!response.ok) {
+        const error = new Error(`Document lookup failed: ${response.status}`);
+        error.status = response.status;
+        throw error;
+    }
+
+    const data = await response.json();
+
+    return data;
+};
+
 
 export {
     uploadDocument,
-    askQuestion
+    askQuestion,
+    getDocument
 };

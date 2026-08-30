@@ -8,6 +8,17 @@ const qdrant = new QdrantClient({
 
 const COLLECTION_NAME = "documents";
 
+const documentIdFilter = (documentId) => ({
+    must: [
+        {
+            key: "documentId",
+            match: {
+                value: documentId
+            }
+        }
+    ]
+});
+
 const initializeCollection = async () => {
     const exists = await qdrant.collectionExists(COLLECTION_NAME);
 
@@ -49,7 +60,17 @@ const storeChunks = async (embeddedChunks, documentId) => {
     console.log(`${points.length} points stored in Qdrant`);
 };
 
+const getDocumentChunkCount = async (documentId) => {
+    const result = await qdrant.count(COLLECTION_NAME, {
+        filter: documentIdFilter(documentId),
+        exact: true
+    });
+
+    return result.count;
+};
+
 export {
     initializeCollection,
+    getDocumentChunkCount,
     storeChunks
 };
