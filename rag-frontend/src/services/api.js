@@ -24,7 +24,7 @@ const uploadDocument = async (file) => {
 };
 
 
-const askQuestion = async (question, documentId) => {
+const askQuestion = async (question, documentId, history = []) => {
     const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/query`,
         {
@@ -35,7 +35,8 @@ const askQuestion = async (question, documentId) => {
             },
             body: JSON.stringify({
                 question: question,
-                documentId: documentId
+                documentId: documentId,
+                history: history
             })
         }
     );

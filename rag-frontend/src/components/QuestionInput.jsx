@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Send, Loader2, AlertCircle } from "lucide-react";
 import { askQuestion as askQuestionApi } from "../services/api.js";
+import getRecentHistory from "../lib/conversation.js";
 
 function QuestionInput({
     uploaded,
@@ -12,7 +13,8 @@ function QuestionInput({
     queryError,
     setQueryError,
     handleQueryResult,
-    documentId
+    documentId,
+    messages = []
 }) {
     const textareaRef = useRef(null);
 
@@ -41,7 +43,7 @@ function QuestionInput({
         setAsking(true);
 
         try {
-            const data = await askQuestionApi(question, documentId);
+            const data = await askQuestionApi(question, documentId, getRecentHistory(messages));
             handleQueryResult(data);
             setQuestion("");
         } catch (error) {

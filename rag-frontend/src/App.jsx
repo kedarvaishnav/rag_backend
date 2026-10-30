@@ -226,6 +226,7 @@ function App() {
                     setQueryError={setQueryError}
                     handleQueryResult={handleQueryResult}
                     documentId={activeDocumentId}
+                    messages={messages}
                 />
             </main>
         </div>
