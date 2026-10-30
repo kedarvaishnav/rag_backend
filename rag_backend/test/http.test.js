@@ -47,6 +47,22 @@ test("invalid query input returns 400 without calling external services", async 
     assert.equal(response.status, 400);
 });
 
+test("invalid conversation history returns 400 before calling external services", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/query`, {
+        method: "POST",
+        headers: {
+            Authorization: "test-token",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            question: "Explain that more",
+            documentId: "a".repeat(64),
+            history: [{ role: "system", content: "invalid role" }]
+        })
+    });
+    assert.equal(response.status, 400);
+});
+
 test("non-PDF upload returns 400", async () => {
     const formData = new FormData();
     formData.append("file", new Blob(["not a PDF"], { type: "text/plain" }), "file.txt");

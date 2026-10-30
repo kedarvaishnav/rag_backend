@@ -1,10 +1,15 @@
 import retrieveChunks from "../services/retrievalService.js";
 import generateAnswer from "../services/generationService.js";
+import rewriteQuestion from "../services/queryRewriteService.js";
 import { z } from "zod";
 
 const querySchema = z.object({
     question: z.string().min(1).max(1000),
-    documentId: z.string().regex(/^[0-9a-fA-F]{64}$/)
+    documentId: z.string().regex(/^[0-9a-fA-F]{64}$/),
+    history: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(1500)
+    })).max(6).optional().default([])
 });
 
 const queryDocument = async (req, res, next) => {
@@ -17,9 +22,10 @@ const queryDocument = async (req, res, next) => {
             });
         }
 
-        const { question, documentId } = parsed.data;
+        const { question, documentId, history } = parsed.data;
+        const retrievalQuestion = await rewriteQuestion(question, history);
 
-        const results = await retrieveChunks(question, documentId);
+        const results = await retrieveChunks(retrievalQuestion, documentId);
 
         const answer= await generateAnswer(question , results);
 
