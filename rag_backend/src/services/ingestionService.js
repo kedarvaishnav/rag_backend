@@ -15,17 +15,9 @@ const processDocument = async (filePath) => {
 
     const existingChunkCount = await getDocumentChunkCount(documentId);
 
-    if (existingChunkCount > 0) {
-        console.log(`Document already exists: ${documentId}`);
-
-        return {
-            alreadyExists: true,
-            documentId,
-            chunkCount: existingChunkCount
-        };
-    }
-
-    console.log(`New document detected: ${documentId}`);
+    console.log(existingChunkCount > 0
+        ? `Document already exists: ${documentId}`
+        : `New document detected: ${documentId}`);
 
     const parser = new PDFParse({
         data: dataBuffer
@@ -46,7 +38,7 @@ const processDocument = async (filePath) => {
     await storeChunks(embeddedChunks, documentId);
 
     return {
-        alreadyExists: false,
+        alreadyExists: existingChunkCount > 0,
         documentId,
         chunkCount: embeddedChunks.length
     };

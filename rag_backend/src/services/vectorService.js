@@ -1,5 +1,5 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
-import crypto from "crypto";
+import getPointId from "./pointId.js";
 
 const qdrant = new QdrantClient({
     url: "http://127.0.0.1:6333",
@@ -41,7 +41,7 @@ const initializeCollection = async () => {
 const storeChunks = async (embeddedChunks, documentId) => {
 
     const points = embeddedChunks.map((chunk, index) => ({
-        id: crypto.randomUUID(),
+        id: getPointId(documentId, index),
 
         vector: chunk.vector,
 
@@ -55,6 +55,21 @@ const storeChunks = async (embeddedChunks, documentId) => {
     await qdrant.upsert(COLLECTION_NAME, {
         wait: true,
         points: points
+    });
+
+    await qdrant.delete(COLLECTION_NAME, {
+        wait: true,
+        filter: {
+            must: [
+                ...documentIdFilter(documentId).must,
+                {
+                    key: "chunkIndex",
+                    range: {
+                        gte: embeddedChunks.length
+                    }
+                }
+            ]
+        }
     });
 
     console.log(`${points.length} points stored in Qdrant`);
