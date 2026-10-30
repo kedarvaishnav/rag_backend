@@ -1,5 +1,5 @@
 // // import "dotenv/config";
-import generateEmbeddings from "./services/embeddingService.js";
+import generateEmbeddings from "../src/services/embeddingService.js";
 
 // const text = "Python is a programming language.";
 

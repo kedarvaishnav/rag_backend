@@ -1,4 +1,8 @@
 const chunkText = (text, chunkSize, overlap) => {
+    if (text.length === 0) {
+        return [];
+    }
+
     const chunks = [];
     let start = 0;
 
@@ -8,6 +12,10 @@ const chunkText = (text, chunkSize, overlap) => {
         const chunk = text.slice(start, end);
 
         chunks.push(chunk);
+
+        if (end >= text.length) {
+            break;
+        }
 
         start += chunkSize - overlap;
     }

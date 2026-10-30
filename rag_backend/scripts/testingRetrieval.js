@@ -1,4 +1,4 @@
-import retrieveChunks from "./services/retrievalService.js";
+import retrieveChunks from "../src/services/retrievalService.js";
 
 const question = "What did John Doe study?";
 const documentId = "test-doc-id";

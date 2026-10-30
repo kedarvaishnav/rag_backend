@@ -40,6 +40,14 @@ const envSchema = z.object({
             }
         }
     }
+
+    if (values.CHUNK_OVERLAP >= values.CHUNK_SIZE) {
+        context.addIssue({
+            code: "custom",
+            path: ["CHUNK_OVERLAP"],
+            message: "CHUNK_OVERLAP must be smaller than CHUNK_SIZE"
+        });
+    }
 });
 
 export const env = envSchema.parse(process.env);
