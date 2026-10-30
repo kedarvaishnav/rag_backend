@@ -1,21 +1,23 @@
 import retrieveChunks from "../services/retrievalService.js";
 import generateAnswer from "../services/generationService.js";
+import { z } from "zod";
+
+const querySchema = z.object({
+    question: z.string().min(1).max(1000),
+    documentId: z.string().regex(/^[0-9a-fA-F]{64}$/)
+});
 
 const queryDocument = async (req, res, next) => {
     try {
-        const { question, documentId } = req.body;
+        const parsed = querySchema.safeParse(req.body ?? {});
 
-        if (!question || typeof question !== "string") {
+        if (!parsed.success) {
             return res.status(400).json({
-                message: "Question is required"
+                message: "Question and a valid document ID are required"
             });
         }
 
-        if (!documentId || typeof documentId !== "string") {
-            return res.status(400).json({
-                message: "Document ID is required"
-            });
-        }
+        const { question, documentId } = parsed.data;
 
         const results = await retrieveChunks(question, documentId);
 

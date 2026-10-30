@@ -1,6 +1,9 @@
 import processDocument from "../services/ingestionService.js";
 import { getDocumentChunkCount } from "../services/vectorService.js";
 import fs from "fs/promises";
+import { z } from "zod";
+
+const documentIdSchema = z.string().regex(/^[0-9a-fA-F]{64}$/);
 
 const cleanupUploadedFile = async (filePath) => {
     if (!filePath) {
@@ -19,6 +22,22 @@ const uploadDocument = async (req, res, next) => {
         if (!req.file) {
             return res.status(400).json({
                 message: "PDF file is required"
+            });
+        }
+
+        const fileHandle = await fs.open(req.file.path, "r");
+        const signature = Buffer.alloc(5);
+
+        try {
+            await fileHandle.read(signature, 0, 5, 0);
+        } finally {
+            await fileHandle.close();
+        }
+
+        if (!signature.equals(Buffer.from("%PDF-"))) {
+            await cleanupUploadedFile(req.file.path);
+            return res.status(400).json({
+                message: "Uploaded file is not a valid PDF"
             });
         }
 
@@ -46,10 +65,10 @@ const getDocument = async (req, res, next) => {
     try {
         const { documentId } = req.params;
 
-        if (!documentId) {
+        if (!documentIdSchema.safeParse(documentId).success) {
             return res.status(400).json({
                 exists: false,
-                message: "Document ID is required"
+                message: "A valid document ID is required"
             });
         }
 
