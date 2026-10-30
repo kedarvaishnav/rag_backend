@@ -27,7 +27,7 @@ const queryDocument = async (req, res, next) => {
 
         const results = await retrieveChunks(retrievalQuestion, documentId);
 
-        const answer= await generateAnswer(question , results);
+        const answer = await generateAnswer(question, results, history);
 
         console.log(`Query completed for document ${documentId}; sources: ${results.length}`);
 

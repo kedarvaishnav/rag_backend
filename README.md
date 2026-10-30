@@ -82,11 +82,13 @@ All endpoints are prefixed with `/api/v1`.
 | `GET /test-error` | No | Exercises the global error handler. |
 | `POST /documents` | Yes | Accepts multipart field `file`; the file must use MIME type `application/pdf`, start with `%PDF-`, and be no larger than 10 MB. |
 | `GET /documents/:documentId` | Yes | Looks up a document by its 64-character hexadecimal SHA-256 ID. |
-| `POST /query` | Yes | Accepts JSON with a question of 1–1000 characters and a 64-character hexadecimal `documentId`. |
+| `POST /query` | Yes | Accepts JSON with a question of 1–1000 characters, a 64-character hexadecimal `documentId`, and optional conversation history of up to six user/assistant messages. Each history message is limited to 1500 characters. |
 
 The upload response includes `message`, `alreadyExists`, `documentId`, `filename`, and `chunkCount`. The query response includes `question`, `answer`, and `sources`. Query retrieval asks Qdrant for up to five chunks matching the given document ID. The successful response shapes are defined by the controllers.
 
 The `Authorization` header must equal the configured shared `AUTH` value. There are no user accounts or per-user document permissions.
+
+The frontend sends up to six recent chat messages with a query. If history is present, the backend asks the configured Gemini model to rewrite the latest message as a standalone retrieval question. The original question and recent history are then included in the answer prompt; retrieved PDF text remains the only factual source. The rewrite and answer prompts tell the model to treat history and document text as untrusted data, not instructions. First-turn questions skip the rewrite call.
 
 ## Storage and processing
 
@@ -107,8 +109,9 @@ The Node built-in tests cover chunking, deterministic point IDs, and HTTP valida
 From `rag-frontend/`:
 
 ```bash
+npm test
 npm run lint
 npm run build
 ```
 
-The frontend package defines lint and build scripts. The backend package defines test, start, and dev scripts.
+The frontend and backend tests use Node's built-in test runner and do not call Gemini or Qdrant. The frontend package defines test, lint, and build scripts. The backend package defines test, start, and dev scripts.
