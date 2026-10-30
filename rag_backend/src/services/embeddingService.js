@@ -11,7 +11,7 @@ const generateEmbeddings = async (chunks) => {
     }));
 
     const response = await ai.models.embedContent({
-        model: "gemini-embedding-2",
+        model: env.EMBEDDING_MODEL,
         contents,
          config: {
             outputDimensionality: 768

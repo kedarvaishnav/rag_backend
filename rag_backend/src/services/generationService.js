@@ -44,7 +44,7 @@ ANSWER:
 `;
 
     const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash-lite",
+        model: env.GENERATION_MODEL,
         contents: prompt
     });
 

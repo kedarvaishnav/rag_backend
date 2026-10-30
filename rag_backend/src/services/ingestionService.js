@@ -4,6 +4,7 @@ import { PDFParse } from "pdf-parse";
 import chunkText from "./chunkingService.js";
 import generateEmbeddings from "./embeddingService.js";
 import { getDocumentChunkCount, storeChunks } from "./vectorService.js";
+import { env } from "../config/env.js";
 
 const processDocument = async (filePath) => {
     const dataBuffer = await fs.readFile(filePath);
@@ -31,7 +32,7 @@ const processDocument = async (filePath) => {
         await parser.destroy();
     }
 
-    const chunks = chunkText(result.text, 1000, 200);
+    const chunks = chunkText(result.text, env.CHUNK_SIZE, env.CHUNK_OVERLAP);
 
     const embeddedChunks = await generateEmbeddings(chunks);
 

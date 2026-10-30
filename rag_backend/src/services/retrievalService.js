@@ -1,12 +1,13 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
 import generateEmbeddings from "./embeddingService.js";
+import { env } from "../config/env.js";
 
 const qdrant = new QdrantClient({
-    url: "http://127.0.0.1:6333",
+    url: env.QDRANT_URL,
     checkCompatibility: false
 });
 
-const COLLECTION_NAME = "documents";
+const COLLECTION_NAME = env.QDRANT_COLLECTION;
 
 const retrieveChunks = async (query, documentId) => {
 
