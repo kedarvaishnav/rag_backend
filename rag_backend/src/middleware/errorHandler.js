@@ -1,9 +1,14 @@
 function errorHandler(err, req, res , next) {
     console.error(err);
-    const status = err.status || err.statusCode || 500;
+    const requestedStatus = Number(err.status || err.statusCode);
+    const status = Number.isInteger(requestedStatus)
+        && requestedStatus >= 400
+        && requestedStatus < 500
+        ? requestedStatus
+        : 500;
 
     res.status(status).json({
-        message: err.message
+        message: status === 500 ? "Internal server error" : err.message
     });
 }
 

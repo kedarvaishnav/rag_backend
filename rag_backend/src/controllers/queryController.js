@@ -23,7 +23,7 @@ const queryDocument = async (req, res, next) => {
 
         const answer= await generateAnswer(question , results);
 
-        console.log("Retrieved results:", results);
+        console.log(`Query completed for document ${documentId}; sources: ${results.length}`);
 
         res.status(200).json({
             question,

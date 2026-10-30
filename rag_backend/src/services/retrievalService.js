@@ -14,10 +14,6 @@ const retrieveChunks = async (query, documentId) => {
 
     const queryVector = queryVectors[0].vector;
 
-    console.log("queryVector is array:", Array.isArray(queryVector));
-    console.log("queryVector length:", queryVector.length);
-    console.log("first 5 values:", queryVector.slice(0, 5));
-
     const results = await qdrant.query(COLLECTION_NAME, {
         query: queryVector,
         limit: 5,
@@ -33,8 +29,6 @@ const retrieveChunks = async (query, documentId) => {
         },
         with_payload: true
     });
-
-    console.log("Qdrant results:", results);
 
     return results.points;
 };
